@@ -17,121 +17,7 @@
   ** let me know (maxime_collomb@yahoo.fr).                          **
   **   if you improve this component, please send me a Copy          **
   ** so iCount can put it on www.torry.net.                               **
-  *********************************************************************
-
-  History :
-  ---------
-
-  06-21-2011 : version 2.03 (by sirius in www.delphi-treff.de || www.delphipraxis.net)
-  (marked sirius2)
-  - added property "current directory" to set for child process
-  - added possibility to add environment variables (see properties)
-  - deleted possible memory leaks
-  - removed class TTimer (not threadsafe) from TProcesstimer (added global var TimerInstances and stuff ->threadsafe)
-  - try to prepare for unicode  !!! not tested
-  - added event OnCharDecoding (for unicode console output); no need for ANSI Text in console
-  - added event OnCharEncoding (for unicode console input); no need for ANSI Text in console
-  - removed bug causing EInvalidpointer with unhandled FatalException in TDosThread (dont free FatalException object)
-  - added MB_TASKMODAL to Error Messagebox of Thread
-  - create pipehandles like in Article ID: 190351 of Microsoft knowledge base
-
-  05-11-2009 : version 2.02 (by sirius in www.delphi-treff.de || www.delphipraxis.net)
-  - added synchronisation (see later)
-  - deleted FOwner in TDosCommand (not needed)
-  - added TInputlines (sync of InputLines)
-  - added critical section and locked functions to Processtimer
-  - added TDosCommand.ThreadTerminate
-  - moved FTimer.Ending to Thread.onTerminate
-  - reraised Excpetion from Thread in onTerminate
-  - added try-finally to whole Thread.Execute method
-  - added Synchronize to FLines and FOutPutLines
-  - added Synchronize to NewLine event
-  - added event for every New char
-  - added TReadPipe(Thread) for waiting to Pipe (blocking ReadFile)
-  - added TSyncstring to Synchronize string transfer (from TReadPipe)
-  - restructured FExecute -> Execute (New methods)
-  - added WaitForMultipleObjects and stuff for less Processing-Time
-
-  13-06-2003 : version 2.01
-  - Added exception when executing with empty CommandLine
-  - Added IsRunning property to check if a command is currently
-  running
-  18-05-2001 : version 2.0
-  - Now, catching the beginning of a line is allowed (usefull if the
-  prog ask for an entry) => the method OnNewLine is modified
-  - Now can send inputs
-  - Add a couple of FreeMem for sa & sd [thanks Gary H. Blaikie]
-  07-05-2001 : version 1.2
-  - Sleep(1) is added to give others processes a chance
-  [thanks Hans-Georg Rickers]
-  - the loop that catch the outputs has been re-writen by
-  Hans-Georg Rickers => no more broken lines
-  30-04-2001 : version 1.1
-  - function IsWinNT() is changed to
-  (Win32Platform = VER_PLATFORM_WIN32_NT) [thanks Marc Scheuner]
-  - empty lines appear in the redirected output
-  - property OutputLines is added to redirect output directly to a
-  memo, richedit, listbox, ... [thanks Jean-Fabien Connault]
-  - a timer is added to offer the possibility of ending the process
-  after XXX sec. after the beginning or YYY sec after the last
-  output [thanks Jean-Fabien Connault]
-  - managing process priorities flags in the CreateProcess
-  thing [thanks Jean-Fabien Connault]
-  20-04-2001 : version 1.0 on www.torry.net
-  *******************************************************************
-  How to use it :
-  ---------------
-  - just put the line of command in the property 'CommandLine'
-  - execute the process with the method 'Execute'
-  - if you want to stop the process before it has ended, use the method 'Stop'
-  - if you want the process to stop by itself after XXX sec of activity,
-  use the property 'MaxTimeAfterBeginning'
-  - if you want the process to stop after XXX sec without an output,
-  use the property 'MaxTimeAfterLastOutput'
-  - to directly redirect outputs to a memo or a richedit, ...
-  use the property 'OutputLines'
-  (DosCommand1.OutputLnes := Memo1.Lines;)
-  - you can access all the outputs of the last command with the property 'Lines'
-  - you can change the priority of the process with the property 'Priority'
-  value of Priority must be in [HIGH_PRIORITY_CLASS, IDLE_PRIORITY_CLASS,
-  NORMAL_PRIORITY_CLASS, REALTIME_PRIORITY_CLASS]
-  - you can have an event for each New line and for the end of the process
-  with the events 'procedure OnNewLine(Sender: TObject; NewLine: string;
-  OutputType: TOutputType);' and 'procedure OnTerminated(Sender: TObject);'
-  - you can send inputs to the dos process with 'SendLine(Value: string;
-  Eol: Boolean);'. Eol is here to determine if the program have to add a
-  CR/LF at the end of the string.
-  *******************************************************************
-  How to call a dos function (win 9x/Me) :
-  ----------------------------------------
-
-  Example : Make a dir :
-  ----------------------
-  - if you want to get the Result of a 'c:\dir /o:gen /l c:\windows\*.txt'
-  for example, you need to make a batch file
-  --the batch file : c:\mydir.bat
-  @echo off
-  dir /o:gen /l %1
-  rem eof
-  --in your code
-  DosCommand.CommandLine := 'c:\mydir.bat c:\windows\*.txt';
-  DosCommand.Execute;
-
-  Example : Format a disk (win 9x/Me) :
-  -------------------------
-  --a batch file : c:\myformat.bat
-  @echo off
-  format %1
-  rem eof
-  --in your code
-  var diskname: string;
-  --
-  DosCommand1.CommandLine := 'c:\myformat.bat a:';
-  DosCommand1.Execute; //launch format process
-  DosCommand1.SendLine('', True); //equivalent to press enter key
-  DiskName := 'test';
-  DosCommand1.SendLine(DiskName, True); //enter the name of the volume
-  ******************************************************************* }
+  *********************************************************************}
 unit DosCommand;
 
 interface
@@ -192,13 +78,13 @@ type
     property SinceLastOutput: Integer read get_SinceLastOutput;
   end;
 
-  TNewLineEvent = procedure(ASender: TObject; const ANewLine: string; AOutputType: TOutputType) of object;
+  TNewLineEvent = reference to procedure(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
   // if New line is read via pipe
   TNewCharEvent = procedure(ASender: TObject; ANewChar: Char) of object;
   // every New char from pipe
   TErrorEvent = procedure(ASender: TObject; AE: Exception; var AHandled: Boolean) of object;
   // if Exception occurs in TDosThread -> if not handled, Messagebox will be shown
-  TTerminateProcessEvent = procedure(ASender: TObject; var ACanTerminate: Boolean) of object;
+  TTerminateProcessEvent = reference to procedure(ASender: TObject; var ACanTerminate: Boolean);
   // called when Dos-Process has to be terminated (via TerminateProcess); just asking if thread can terminate process
 
   // added by sirius (synchronizes inputlines between Mainthread and TDosThread)
@@ -295,6 +181,7 @@ type
     property InputLines: TInputLines read FInputLines;
   end;
 
+  TNotifyReference = reference to procedure(ASender: TObject);
   TDosCommand = class(TComponent) // the component to put on a form
   strict private
     FCommandLine: string;
@@ -310,7 +197,7 @@ type
     FonExecuteError: TErrorEvent;
     FOnNewChar: TNewCharEvent;
     FOnNewLine: TNewLineEvent;
-    FOnTerminated: TNotifyEvent;
+    FOnTerminated: TNotifyReference;
     FOnTerminateProcess: TTerminateProcessEvent;
     FOutputLines: TStrings;
     FPriority: Integer;
@@ -327,6 +214,7 @@ type
     function DoCharDecoding(ASender: TObject; ABuf: TStream): string; virtual;
     procedure DoCharEncoding(ASender: TObject; const AChars: string; AOutBuf: TStream); virtual;
     procedure ThreadTerminated(ASender: TObject);
+//    procedure OnTerminate(ASender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -352,7 +240,7 @@ type
     property OnExecuteError: TErrorEvent read FonExecuteError write FonExecuteError; // event if DosCommand.execute is aborted via Exception
     property OnNewChar: TNewCharEvent read FOnNewChar write FOnNewChar; // event for each New char that is received through the pipe
     property OnNewLine: TNewLineEvent read FOnNewLine write FOnNewLine; // event for each New line that is received through the pipe
-    property OnTerminated: TNotifyEvent read FOnTerminated write FOnTerminated; // event for the end of the process (normally, time out or by user (DosCommand.Stop;))
+    property OnTerminated: TNotifyReference read FOnTerminated write FOnTerminated; // event for the end of the process (normally, time out or by user (DosCommand.Stop;))
     property OnTerminateProcess: TTerminateProcessEvent read FOnTerminateProcess write FOnTerminateProcess; // event to ask for processtermination
   end;
 
