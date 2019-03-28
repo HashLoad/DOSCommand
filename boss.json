@@ -5,8 +5,8 @@
 	"homepage": "",
 	"mainsrc": "Source/",
 	"projects": [
-		"Packages/Delphi/DOSCommandDD.dproj",
-		"Packages/Delphi/DOSCommandDR.dproj"	
+		"Packages/Delphi/DOSCommandDR.dproj",
+		"Packages/Delphi/DOSCommandDD.dproj"	
 	],
 	"dependencies": {}
 }
