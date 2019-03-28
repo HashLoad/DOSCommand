@@ -8,5 +8,5 @@
 		"Packages/Delphi/DOSCommandDD.dproj",
 		"Packages/Delphi/DOSCommandDR.dproj"	
 	],
-	"dependencies": []
+	"dependencies": {}
 }
